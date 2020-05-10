@@ -1,0 +1,46 @@
+version: '3.5'
+
+services:
+  #Nginx Service
+  nginx:
+    build:
+      context: ./nginx
+    container_name: nginx
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./laravel:/code
+      - ./nginx/conf.d:/etc/nginx/conf.d
+    tty: true
+    restart: always
+    networks:
+      - color-network
+    depends_on:
+      - php
+  #PHP-FPM Service
+  php:
+    build:
+      args:
+        user: asyou
+        uid: 1000
+      context: ./php-fpm
+    container_name: php
+    volumes:
+      - ./laravel:/code
+    environment:
+      XDEBUG_CONFIG: "remote_host=192.168.220.1"
+      PHP_IDE_CONFIG: "serverName=Docker"
+    tty: true
+    restart: always
+    networks:
+      - color-network
+
+#Docker Networks
+networks:
+  color-network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.220.0/28
